@@ -27,7 +27,8 @@ function useStack(ref: RefObject<HTMLElement | null>) {
       trigger: node,
       start: () => (node.offsetHeight > window.innerHeight + 2 ? 'bottom bottom' : 'top top'),
       endTrigger: next, end: 'top top',
-      pin: true, pinSpacing: false, anticipatePin: 1, invalidateOnRefresh: true,   // anticipate: fix it a hair early, native scroll runs ahead of JS
+      // no anticipatePin: with Lenis the scroll runs in step with ScrollTrigger, and anticipating fixed the block ~100px early (a visible jump)
+      pin: true, pinSpacing: false, invalidateOnRefresh: true,
     });
     return () => st.kill();
   }, [ready, ref]);
@@ -338,7 +339,9 @@ export function Gallery() {
       <div ref={track} className="gal-track">
         {GALLERY.map((g, k) => (
           <button key={g.src} className="gal-card" style={{ '--r': g.r } as CSSProperties} onClick={() => setOpen(k)} aria-label={`${t('gal_open')}: ${t(g.t)}`}>
-            <img src={g.src} alt={t(g.t)} loading="lazy" draggable={false} />
+            {/* 600px-tall copies (public/img/g) for the cards: drawing the 1920px originals into a 560px card the first time
+                the strip came near the screen cost ~35 ms of GPU raster — a visible jerk. Full size only for retina and the lightbox. */}
+            <img src={g.src.replace('/img/', '/img/g/')} srcSet={`${g.src.replace('/img/', '/img/g/')} 1x, ${g.src} 2x`} alt={t(g.t)} draggable={false} decoding="async" />
             <span><i>{pad(k + 1)}</i>{t(g.t)}</span>
           </button>
         ))}
@@ -404,7 +407,7 @@ export function Footer() {
   // while the events block slides away over it; a footer taller than the screen then scrolls on as usual
   useEffect(() => {
     if (!ready) return;
-    const st = ScrollTrigger.create({ trigger: el.current, start: 'top top', end: () => `+=${window.innerHeight}`, pin: true, anticipatePin: 1, invalidateOnRefresh: true });
+    const st = ScrollTrigger.create({ trigger: el.current, start: 'top top', end: () => `+=${window.innerHeight}`, pin: true, invalidateOnRefresh: true });
     return () => st.kill();
   }, [ready]);
 

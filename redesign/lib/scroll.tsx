@@ -60,7 +60,21 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     const refresh = () => ScrollTrigger.refresh();
     document.fonts?.ready.then(refresh);
     window.addEventListener('load', refresh);
+    // Fetch and decode every photo of the page while it is idle after load. Lazy photos were fetched and decoded the moment they
+    // neared the screen, mid-scroll — a 30–40 ms frame each time a big photo (gallery, backgrounds) came in: a visible jerk.
+    let warmed = false;
+    const warm = async () => {
+      if (warmed) return; warmed = true;
+      for (const img of Array.from(document.querySelectorAll<HTMLImageElement>('main img'))) {
+        img.loading = 'eager';
+        try { await img.decode(); } catch { /* broken or detached: skip */ }
+      }
+    };
+    const idle = (cb: () => void) => ('requestIdleCallback' in window ? window.requestIdleCallback(cb, { timeout: 2500 }) : setTimeout(cb, 1200));
+    const onLoad = () => idle(() => { void warm(); });
+    if (document.readyState === 'complete') onLoad(); else window.addEventListener('load', onLoad, { once: true });
     return () => {
+      window.removeEventListener('load', onLoad);
       window.removeEventListener('load', refresh); window.removeEventListener('resize', onResize); ScrollTrigger.removeEventListener('refreshInit', setVh);
       gsap.ticker.remove(tick); ln.destroy(); lenis = null;
     };
