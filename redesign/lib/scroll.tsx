@@ -71,7 +71,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       }
     };
     const idle = (cb: () => void) => ('requestIdleCallback' in window ? window.requestIdleCallback(cb, { timeout: 2500 }) : setTimeout(cb, 1200));
-    const onLoad = () => idle(() => { void warm(); });
+    const onLoad = () => setTimeout(() => idle(() => { void warm(); }), 2500);   // well after the first screen is done, never competing with it
     if (document.readyState === 'complete') onLoad(); else window.addEventListener('load', onLoad, { once: true });
     return () => {
       window.removeEventListener('load', onLoad);

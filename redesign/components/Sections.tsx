@@ -34,9 +34,16 @@ function useStack(ref: RefObject<HTMLElement | null>) {
   }, [ready, ref]);
 }
 
-/** Darkened full-bleed photo behind a dark block (same treatment as the opening hours). */
+/** Responsive widths of a hero photo (public/img/r, generated from the 1920px original). */
+const sizesOf = (src: string) => {
+  const n = src.split('/').pop()!.replace('.webp', '');
+  return `/img/r/${n}-640.webp 640w, /img/r/${n}-1024.webp 1024w, /img/r/${n}-1440.webp 1440w, ${src} 1920w`;
+};
+
+/** Darkened full-bleed photo behind a dark block (same treatment as the opening hours).
+ *  It shows through at 5–23% only, so a 1280px, strongly compressed copy (public/img/r/*-bg.webp) is indistinguishable and ~4x lighter. */
 function DarkBg({ src }: { src: string }) {
-  return <div className="dk-bg" aria-hidden><img src={src} alt="" width={1600} height={1067} loading="lazy" /></div>;
+  return <div className="dk-bg" aria-hidden><img src={src} alt="" width={1280} height={853} loading="lazy" decoding="async" /></div>;
 }
 
 /** Section label + two-part heading (second part is the italic accent). */
@@ -69,6 +76,16 @@ export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }
     img.addEventListener('load', done); img.addEventListener('error', done);
     return () => { img.removeEventListener('load', done); img.removeEventListener('error', done); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // the other slides sit inside the screen (opacity 0), so the browser fetched them with the first one, competing with it.
+  // Give them their source only once the page has loaded; the first change is HERO_INTERVAL later anyway.
+  const [rest, setRest] = useState(false);
+  useEffect(() => {
+    const go = () => setTimeout(() => setRest(true), 800);
+    if (document.readyState === 'complete') { const id = go(); return () => clearTimeout(id); }
+    window.addEventListener('load', go, { once: true });
+    return () => window.removeEventListener('load', go);
   }, []);
 
   // the slideshow only plays while the page is at the very top. Once block 01 starts to ride over the hero, slide changes
@@ -106,8 +123,12 @@ export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }
       <div className="hero-media" aria-hidden>
         {HERO_SLIDES.map((s, k) => (
           <picture key={s.src} className={k === i ? 'on' : ''}>
-            {'m' in s ? <source media="(max-width: 700px)" srcSet={s.m} /> : null}
-            <img ref={k === 0 ? first : undefined} src={s.src} alt="" width={1920} height={1280} loading={k === 0 ? 'eager' : 'lazy'} fetchPriority={k === 0 ? 'high' : 'auto'} />
+            {/* widths in public/img/r; "cover" on a wide screen needs max(100vw, 150vh). Phones (dense screens, the photo is dimmed under the text)
+                ask for 380px so the browser takes the 1024w copy instead of the 1920px original */}
+            {k === 0 || rest ? (
+              <img ref={k === 0 ? first : undefined} src={s.src} srcSet={sizesOf(s.src)} sizes="(max-width: 900px) 380px, max(100vw, 150vh)" alt="" width={1920} height={1280}
+                fetchPriority={k === 0 ? 'high' : 'low'} decoding="async" />
+            ) : null}
           </picture>
         ))}
       </div>
@@ -162,7 +183,7 @@ export function About() {
       <div className="about-grid">
         <Reveal from="up" className="about-photo">
           <div ref={photo} className="about-photo-in">
-            <img src="/img/entrance.webp" alt={t('about_alt')} width={994} height={670} decoding="async" />
+            <img src="/img/entrance.webp" srcSet="/img/r/entrance-600.webp 600w, /img/entrance.webp 994w" sizes="(max-width: 900px) 100vw, 55vw" alt={t('about_alt')} width={994} height={670} decoding="async" />
           </div>
         </Reveal>
         <div className="about-copy">
@@ -233,7 +254,7 @@ export function Hours() {
 
   return (
     <section ref={el} id="hours" className="sec hours" data-tone="dark">
-      <DarkBg src="/img/hall.webp" />
+      <DarkBg src="/img/r/hall-bg.webp" />
       <Head k={t('hours_k')} h1={t('hours_h1')} h2={t('hours_h2')} />
       <div className="hours-grid">
         <Reveal from="up" delay={80}>
@@ -342,7 +363,7 @@ export function Gallery() {
   return (
     <>
     <section ref={el} id="gallery" className="gal" data-tone="dark">
-      <DarkBg src="/img/room.webp" />
+      <DarkBg src="/img/r/room-bg.webp" />
       <div className="gal-head">
         <Head n="03" k={t('gal_k')} h1={t('gal_h1')} h2={t('gal_h2')} />
         {!staticMode && <Reveal delay={140}><p className="gal-hint">{t('gal_hint')} <span className="arr">→</span></p></Reveal>}
@@ -352,7 +373,7 @@ export function Gallery() {
           <button key={g.src} className="gal-card" style={{ '--r': g.r } as CSSProperties} onClick={() => setOpen(k)} aria-label={`${t('gal_open')}: ${t(g.t)}`}>
             {/* 600px-tall copies (public/img/g) for the cards: drawing the 1920px originals into a 560px card the first time
                 the strip came near the screen cost ~35 ms of GPU raster — a visible jerk. Full size only for retina and the lightbox. */}
-            <img src={g.src.replace('/img/', '/img/g/')} srcSet={`${g.src.replace('/img/', '/img/g/')} 1x, ${g.src} 2x`} alt={t(g.t)} draggable={false} decoding="async" />
+            <img src={g.src.replace('/img/', '/img/g/')} srcSet={`${g.src.replace('/img/', '/img/g/')} 900w, ${g.src} 1920w`} sizes="(max-width: 900px) 70vw, 45vw" alt={t(g.t)} draggable={false} loading="lazy" decoding="async" />
             <span><i>{pad(k + 1)}</i>{t(g.t)}</span>
           </button>
         ))}
@@ -453,7 +474,7 @@ export function Footer() {
 
   return (
     <footer ref={el} id="contact" className="ftr" data-tone="dark" data-under>
-      <DarkBg src="/img/hero-2.webp" />
+      <DarkBg src="/img/r/hero-2-bg.webp" />
       <div className="ftr-top">
         <Head n="05" k={t('f_contact')} h1={t('f_h1')} h2={t('f_h2')} />
         <Reveal delay={140}><button className="btn solid" onClick={openReserve}>{t('reserve')} <span className="arr">→</span></button></Reveal>

@@ -12,7 +12,7 @@ export default function Page() {
   // never hold the page behind the preloader for long: the first hero photo usually lands well before this
   useEffect(() => {
     if (window.scrollY > 300) { setPct(100); return; }
-    const id = setTimeout(() => setPct(100), 3500);
+    const id = setTimeout(() => setPct(100), 1800);   // on a slow phone the text shows on the dark hero and the photo fades in after
     return () => clearTimeout(id);
   }, []);
   return (

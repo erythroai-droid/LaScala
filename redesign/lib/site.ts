@@ -7,9 +7,9 @@ export const PHONE = { label: '+7 495 607 52 53', href: 'tel:+74956075253' };
 export const MOBILE = { label: '+7 (977) 564 64 36', href: 'tel:+79775646436' };
 export const EMAIL = 'info@lascalaristorante.ru';
 
-/** Hero slideshow (public/img). `m` is the phone-sized variant, when there is one. */
+/** Hero slideshow (public/img; smaller widths in public/img/r, picked by srcset). */
 export const HERO_SLIDES = [
-  { src: '/img/hero-1.webp', m: '/img/hero-1-m.webp' },
+  { src: '/img/hero-1.webp' },
   { src: '/img/hero-2.webp' },
   { src: '/img/hero-3.webp' },
 ] as const;

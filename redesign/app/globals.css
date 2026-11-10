@@ -56,7 +56,7 @@ h3{font-family:var(--serif);font-weight:500}
 .cur[data-mode=text]{opacity:0}
 
 /* ---------- preloader: thin circle filled by the load progress ---------- */
-.pre{position:fixed;inset:0;z-index:100;background:var(--dark);color:var(--cream);display:grid;place-items:center;transition:opacity .9s ease .2s,visibility .9s .2s}
+.pre{position:fixed;inset:0;z-index:100;background:var(--dark);color:var(--cream);display:grid;place-items:center;transition:opacity .5s ease,visibility .5s}
 .pre.done{opacity:0;visibility:hidden}
 .pre svg{position:absolute;width:min(70vmin,560px);height:min(70vmin,560px);transform:rotate(-90deg)}
 .pre-track{stroke:rgba(242,236,223,.12);stroke-width:1.5}
@@ -108,11 +108,11 @@ html.static .hero-media{will-change:auto}
 .hero-k{color:var(--gold-l);margin-block-end:22px}
 .hero h1{font-size:clamp(52px,10.4vw,188px);line-height:.9}
 .hero h1 span{display:block;overflow:hidden;padding-block-end:.12em;margin-block-end:-.12em}
-.hero h1 b{display:block;font-weight:400;animation:rise 1.2s var(--ease) .55s both}
-.hero h1 span+span b{animation-delay:.7s}
+.hero h1 b{display:block;font-weight:400;animation:rise 1s var(--ease) .2s both}
+.hero h1 span+span b{animation-delay:.35s}
 .hero h1 em{color:var(--gold-l)}
 @keyframes rise{from{transform:translateY(112%)}to{transform:none}}
-.hero-foot{display:flex;align-items:center;gap:36px;margin-block-start:clamp(22px,4vh,44px);animation:fade 1.2s ease 1.2s both}
+.hero-foot{display:flex;align-items:center;gap:36px;margin-block-start:clamp(22px,4vh,44px);animation:fade .8s ease .5s both}
 .hero-foot p{max-width:430px;color:rgba(242,236,223,.82)}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 .hero-bar{position:absolute;inset-inline:var(--gx);inset-block-end:28px;display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:20px;font-size:12px;letter-spacing:.06em;color:rgba(242,236,223,.75)}
