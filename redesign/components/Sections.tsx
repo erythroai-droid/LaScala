@@ -85,7 +85,9 @@ export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }
       .to(media, { scale: 1.12, ease: 'none' }, 0)
       .to(veil, { opacity: 1, ease: 'none' }, 0)
       .to(inner, { yPercent: -8, autoAlpha: 0, ease: 'none' }, 0);
-    return () => { tl.scrollTrigger?.kill(); tl.kill(); gsap.set([media, inner, veil], { clearProps: 'all' }); };
+    // once block 01 covers the hero completely, stop painting it (slideshow, Ken Burns) — it only cost frames under the moving page
+    const off = ScrollTrigger.create({ trigger: node, start: 'bottom top', end: 'max', onToggle: (s) => node.classList.toggle('off', s.isActive) });
+    return () => { off.kill(); node.classList.remove('off'); tl.scrollTrigger?.kill(); tl.kill(); gsap.set([media, inner, veil], { clearProps: 'all' }); };
   }, [ready]);
 
   return (
@@ -146,7 +148,7 @@ export function About() {
     <section id="about" className="sec about" data-tone="light">
       <Head n="01" k={t('about_k')} h1={t('about_h1')} h2={t('about_h2')} />
       <div className="about-grid">
-        <Reveal from="clip" className="about-photo">
+        <Reveal from="up" className="about-photo">
           <div ref={photo} className="about-photo-in">
             <img src="/img/entrance.webp" alt={t('about_alt')} width={994} height={670} loading="lazy" />
           </div>
@@ -182,8 +184,10 @@ export function Marquee() {
   useEffect(() => {
     if (!ready) return;
     const node = row.current!;
+    // force3D off: as a GPU layer the row was a texture thousands of px wide (×DPR²) and pushed the page out of tile memory —
+    // the whole block 01 blinked black. Repainting one strip of text per frame is far cheaper.
     const tw = gsap.fromTo(node, { xPercent: 0 }, {
-      xPercent: -50, ease: 'none',
+      xPercent: -50, ease: 'none', force3D: false,
       scrollTrigger: { trigger: node.parentElement, start: 'top bottom', end: 'bottom top', scrub: true },
     });
     return () => { tw.scrollTrigger?.kill(); tw.kill(); gsap.set(node, { clearProps: 'transform' }); };
@@ -191,7 +195,7 @@ export function Marquee() {
   return (
     <div className="marq" aria-hidden>
       <div ref={row} className="marq-row">
-        {Array.from({ length: 6 }, (_, i) => <span key={i} className={i % 2 ? 'o' : ''}>{i % 2 ? `${MODEL} Italiano` : BRAND}</span>)}
+        {Array.from({ length: 4 }, (_, i) => <span key={i} className={i % 2 ? 'o' : ''}>{i % 2 ? `${MODEL} Italiano` : BRAND}</span>)}
       </div>
     </div>
   );

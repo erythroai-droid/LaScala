@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru" dir="ltr" suppressHydrationWarning>
       <head>
         {/* decide the static (no-animation) layout before first paint, so phones never flash the animated one */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.toggle('static',matchMedia('(max-width: 900px), (prefers-reduced-motion: reduce)').matches)" }} />
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.toggle('static',matchMedia('(max-width: 900px), (prefers-reduced-motion: reduce), (hover: none) and (pointer: coarse)').matches)" }} />
       </head>
       <body>
         <I18nProvider>{children}</I18nProvider>

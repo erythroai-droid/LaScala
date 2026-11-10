@@ -37,11 +37,13 @@ h2 em{color:var(--red)}
 h3{font-family:var(--serif);font-weight:500}
 
 /* ---------- custom cursor ---------- */
-.cur{position:fixed;left:0;top:0;z-index:300;pointer-events:none;opacity:0;transition:opacity .3s;mix-blend-mode:difference}
+/* no mix-blend-mode: blending a fixed layer over the whole smoothed page made Chrome drop tiles of the page (blank flashes);
+   a gold ring with a dark halo reads on both light and dark blocks */
+.cur{position:fixed;left:0;top:0;z-index:300;pointer-events:none;opacity:0;transition:opacity .3s}
 .cur.on{opacity:1}
-.cur-ring{position:absolute;width:36px;height:36px;left:-18px;top:-18px;border-radius:50%;border:1px solid #fff;transition:width .35s var(--ease),height .35s var(--ease),left .35s var(--ease),top .35s var(--ease),background .3s}
-.cur-arrow{position:absolute;width:10px;left:-5px;top:-4px;color:#000;opacity:0;transform:scale(.4);transition:opacity .25s,transform .35s var(--ease)}
-.cur[data-mode=link] .cur-ring{width:20px;height:20px;left:-10px;top:-10px;background:#fff}
+.cur-ring{position:absolute;width:36px;height:36px;left:-18px;top:-18px;border-radius:50%;border:1px solid var(--gold-l);box-shadow:0 0 0 1px rgba(20,17,14,.25);transition:width .35s var(--ease),height .35s var(--ease),left .35s var(--ease),top .35s var(--ease),background .3s}
+.cur-arrow{position:absolute;width:10px;left:-5px;top:-4px;color:#fff;opacity:0;transform:scale(.4);transition:opacity .25s,transform .35s var(--ease)}
+.cur[data-mode=link] .cur-ring{width:20px;height:20px;left:-10px;top:-10px;background:var(--red);border-color:var(--red)}
 .cur[data-mode=link] .cur-arrow{opacity:1;transform:none}
 .cur.down .cur-ring{transform:scale(.8)}
 .cur[data-mode=text]{opacity:0}
@@ -58,8 +60,9 @@ h3{font-family:var(--serif);font-weight:500}
 
 /* ---------- header ---------- */
 .hdr{position:fixed;z-index:30;inset-block-start:0;inset-inline:0;display:flex;justify-content:space-between;align-items:center;padding:20px var(--gx);color:var(--fg);transition:color .35s,background .35s,padding .35s var(--ease)}
-.hdr.solid{padding-block:11px;background:rgba(242,236,223,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.hdr.solid.on-dark{background:rgba(20,17,14,.6)}
+/* no backdrop blur: re-blurring the moving page under the header every frame is what made it shimmer on weaker GPUs and in Safari */
+.hdr.solid{padding-block:11px;background:rgba(242,236,223,.96)}
+.hdr.solid.on-dark{background:rgba(20,17,14,.9)}
 .hdr-l,.hdr-r{display:flex;align-items:center;gap:26px}
 .hdr.on-dark{color:var(--cream)}
 .logo{font-family:var(--serif);font-weight:500;font-size:27px;line-height:1;letter-spacing:.01em;white-space:nowrap}
@@ -81,7 +84,9 @@ h3{font-family:var(--serif);font-weight:500}
 
 /* ---------- hero ---------- */
 .hero{position:relative;height:var(--vh);min-height:560px;overflow:hidden;background:var(--dark);color:var(--cream)}
-.hero-media{position:absolute;inset:0;will-change:transform}
+.hero-media{position:absolute;inset:0}
+.hero.off{visibility:hidden}
+.hero.off *{animation-play-state:paused!important}
 .hero-media picture{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease}
 .hero-media picture.on{opacity:1}
 .hero-media img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
@@ -117,7 +122,7 @@ h3{font-family:var(--serif);font-weight:500}
 
 /* ---------- screen-high blocks; the one after each dark block rides up over it (later blocks paint on top) ---------- */
 .sec{position:relative;min-height:var(--vh);display:flex;flex-direction:column;justify-content:center;padding:clamp(84px,13vh,160px) var(--gx)}
-.about,.menu-sec,.events{border-radius:28px 28px 0 0;box-shadow:0 -40px 90px rgba(0,0,0,.45)}
+.about,.menu-sec,.events{border-radius:28px 28px 0 0;box-shadow:0 -24px 48px rgba(0,0,0,.4)}
 .sec-head{display:grid;gap:22px;margin-block-end:clamp(40px,7vh,84px)}
 
 /* darkened photo behind dark blocks (hours, gallery, footer) */
@@ -127,14 +132,15 @@ h3{font-family:var(--serif);font-weight:500}
 :is(.hours,.gal,.ftr)>:not(.dk-bg){position:relative}
 
 /* reveal (GSAP animates opacity/transform; hidden until then) */
-.rv{opacity:0;visibility:hidden;will-change:transform,opacity,clip-path}
-.rv.in{will-change:auto}
+/* no permanent will-change: each hinted block became its own GPU layer and the page ran out of tile memory (blank flashes) */
+.rv{opacity:0;visibility:hidden}
 html.static .rv{opacity:1;visibility:visible;clip-path:none;transform:none}
 
 /* ---------- 01 about ---------- */
 .about{background:var(--bg)}
 .about-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(30px,6vw,110px);align-items:center}
-.about-photo-in{overflow:hidden;border-radius:4px;aspect-ratio:994/670;background:#ddd5c5}
+/* isolation + own layer: Safari otherwise drops the rounded clip for a frame while the photo inside moves, and the corners flash */
+.about-photo-in{overflow:hidden;border-radius:4px;aspect-ratio:994/670;background:#ddd5c5;isolation:isolate}
 .about-photo-in img{width:100%;height:116%;margin-block-start:-8%;object-fit:cover;max-width:none}
 .about-copy p{margin-block-end:1.1em;color:#4a443c}
 .about-copy .lead{font-family:var(--serif);font-style:italic;font-size:clamp(24px,2.3vw,36px);line-height:1.25;color:var(--gold);margin-block-end:.9em}
@@ -147,7 +153,7 @@ html.static .rv{opacity:1;visibility:visible;clip-path:none;transform:none}
 
 /* ---------- marquee ---------- */
 .marq{overflow:hidden;margin-inline:calc(var(--gx) * -1);padding-block:clamp(40px,8vh,90px) 0;contain:paint}
-.marq-row{display:flex;width:max-content;will-change:transform}
+.marq-row{display:flex;width:max-content}
 .marq-row span{font-family:var(--serif);font-size:clamp(84px,15vw,270px);line-height:1;letter-spacing:-.03em;padding-inline-end:.3em;white-space:nowrap;color:var(--fg)}
 .marq-row span.o{font-style:italic;color:transparent;-webkit-text-stroke:1px rgba(27,24,21,.4)}
 
@@ -167,7 +173,7 @@ html.static .rv{opacity:1;visibility:visible;clip-path:none;transform:none}
 .hours-call a:hover{color:var(--gold-l)}
 
 /* ---------- 02 menu ---------- */
-.menu-sec{background:var(--panel);overflow:hidden}
+.menu-sec{background:var(--panel);overflow:hidden;isolation:isolate}   /* keeps the multiply blend of the side drawings inside this block */
 .menu-deco{position:absolute;inset-block-start:60px;max-width:none;mix-blend-mode:multiply;pointer-events:none;opacity:.95}
 .menu-deco.l{inset-inline-start:calc(50% - 990px);-webkit-mask-image:linear-gradient(to right,#000 60%,transparent);mask-image:linear-gradient(to right,#000 60%,transparent)}
 .menu-deco.r{inset-inline-end:calc(50% - 990px);-webkit-mask-image:linear-gradient(to left,#000 45%,transparent 92%);mask-image:linear-gradient(to left,#000 45%,transparent 92%)}
@@ -195,7 +201,7 @@ html.static .rv{opacity:1;visibility:visible;clip-path:none;transform:none}
 .gal h2 em{color:var(--gold-l)}
 .gal small{color:rgba(242,236,223,.6)}
 .gal-hint{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,236,223,.6);white-space:nowrap}
-.gal-track{display:flex;gap:clamp(14px,2vw,34px);width:max-content;padding-inline:var(--gx);will-change:transform}
+.gal-track{display:flex;gap:clamp(14px,2vw,34px);width:max-content;padding-inline:var(--gx)}
 /* each photo sits in a dark mat with a thin gold frame and a deep shadow, so neighbours never run into each other */
 .gal .dk-bg img{opacity:.18}
 .gal .dk-bg::after{background:linear-gradient(90deg,rgba(20,17,14,.92),rgba(20,17,14,.6))}
@@ -281,9 +287,9 @@ html.static .rv{opacity:1;visibility:visible;clip-path:none;transform:none}
 
 /* ---------- static page (phones, tablets, reduced motion): no smooth scroll, pins or scrubbing ---------- */
 html.static{--vh:100svh}
-html.static .hdr{background:rgba(242,236,223,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--fg);padding-block:12px}
+html.static .hdr{background:rgba(242,236,223,.97);color:var(--fg);padding-block:12px}
 html.static .hdr.on-dark{color:var(--fg)}
-html.static .hdr.solid.on-dark{background:rgba(242,236,223,.92)}
+html.static .hdr.solid.on-dark{background:rgba(242,236,223,.97)}
 html.static :is(.about,.menu-sec,.events){box-shadow:none;border-radius:0}
 html.static .events{margin-block-end:0}
 html.static .sec{min-height:0}

@@ -10,7 +10,8 @@ if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger, ScrollSmoo
 export const HOLD = 100;
 
 /** Phones/tablets and people who asked for reduced motion get a static page: no smooth scroll, pins or scrubbing, only still images. Keep in sync with the inline script in layout.tsx. */
-export const STATIC_QUERY = '(max-width: 900px), (prefers-reduced-motion: reduce)';
+// Touch screens of any size too: there the browser scrolls natively on its own thread and a JS-smoothed page lags behind it and shakes.
+export const STATIC_QUERY = '(max-width: 900px), (prefers-reduced-motion: reduce), (hover: none) and (pointer: coarse)';
 const subscribeStatic = (cb: () => void) => { const mq = window.matchMedia(STATIC_QUERY); mq.addEventListener('change', cb); return () => mq.removeEventListener('change', cb); };
 export const useStaticMode = () => useSyncExternalStore(subscribeStatic, () => window.matchMedia(STATIC_QUERY).matches, () => false);
 
