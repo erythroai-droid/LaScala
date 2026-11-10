@@ -2,9 +2,11 @@
 import { createContext, ReactNode, useContext, useEffect, useState, useSyncExternalStore } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
 
-if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+// Native scrolling, no ScrollSmoother: the smoother moves the whole page as one transformed layer (~10 000 px tall, ×2 on retina),
+// which is over the GPU texture limit of Safari/Firefox/many integrated GPUs — they skipped drawing it and block 01 blinked out.
+// Pins now use position: fixed (ScrollTrigger's default with native scroll), which the compositor keeps rock-steady.
+if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
 /** Pause (in screens, 100 = one screen) at the end of a block before the next one starts to slide over it. Keep in sync with --hold in globals.css. */
 export const HOLD = 100;
@@ -45,17 +47,11 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     window.addEventListener('resize', onResize);
     ScrollTrigger.addEventListener('refreshInit', setVh);   // re-measure on every refresh, resize events are not reliable on phones
     ScrollTrigger.config({ ignoreMobileResize: true });
-    const sm = ScrollSmoother.create({
-      wrapper: '#smooth-wrapper',
-      content: '#smooth-content',
-      smooth: prefersReducedMotion() ? 0 : 1.15,   // seconds the content takes to catch up with the native scroll
-      effects: false,
-    });
     setReady(true);
     const refresh = () => ScrollTrigger.refresh();
     document.fonts?.ready.then(refresh);
     window.addEventListener('load', refresh);
-    return () => { window.removeEventListener('load', refresh); window.removeEventListener('resize', onResize); ScrollTrigger.removeEventListener('refreshInit', setVh); sm.kill(); };
+    return () => { window.removeEventListener('load', refresh); window.removeEventListener('resize', onResize); ScrollTrigger.removeEventListener('refreshInit', setVh); };
   }, [staticMode]);
 
   return (
@@ -67,7 +63,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
 
 /** Pause/resume scrolling (modals). */
 export function lockScroll(lock: boolean) {
-  ScrollSmoother.get()?.paused(lock);
+  document.documentElement.style.overflow = lock ? 'hidden' : '';
   document.body.style.overflow = lock ? 'hidden' : '';
 }
 
@@ -76,8 +72,7 @@ export function refreshScroll() { ScrollTrigger.refresh(); }
 
 /** Glide to the section that contains `hash` (menu and search links). */
 export function goToSection(hash: string) {
-  const sm = ScrollSmoother.get();
-  if (!sm) {                                              // static page: native smooth scroll
+  if (document.documentElement.classList.contains('static')) {   // static page: native smooth scroll
     if (hash === '#top') window.scrollTo({ top: 0, behavior: 'smooth' });
     else document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' });
     return;
@@ -85,15 +80,16 @@ export function goToSection(hash: string) {
   if (hash === '#top') { glideTo(0); return; }
   const el = document.querySelector<HTMLElement>(hash);
   if (!el) return;
-  // the footer waits under the events block: go to where it is fully uncovered (or the end of the page)
-  if (el.hasAttribute('data-under')) { glideTo(Math.min(ScrollTrigger.maxScroll(window), sm.offset(el.previousElementSibling as HTMLElement, 'bottom top'))); return; }
-  // a pinned block is measured through its pin spacer (its own box moves while pinned)
+  const pageY = (n: Element, edge: 'top' | 'bottom') => n.getBoundingClientRect()[edge] + window.scrollY;
+  // a pinned block is measured through its pin spacer (its own box is fixed to the screen while pinned)
   const ref = el.parentElement?.classList.contains('pin-spacer') ? el.parentElement : el;
-  glideTo(sm.offset(ref, 'top top'));
+  // the footer waits under the events block: go to where it is fully uncovered (or the end of the page)
+  const cover = el.hasAttribute('data-under') ? ref.previousElementSibling : null;
+  if (cover) { glideTo(Math.min(ScrollTrigger.maxScroll(window), pageY(cover, 'bottom'))); return; }
+  glideTo(pageY(ref, 'top'));
 }
 
-// sm.scrollTo(y, true) moves the native scroll at once and leaves the content to catch up within the smoothing time, so over many screens
-// (footer -> top) the page just jumps. Tween the native scroll instead; the smoother still softens it. Any user input hands control back.
+// Glide the native scroll (window.scrollTo with behavior: smooth is too quick over many screens). Any user input hands control back.
 let glide: gsap.core.Tween | null = null;
 function glideTo(y: number) {
   glide?.kill();
@@ -114,7 +110,7 @@ function glideTo(y: number) {
   });
 }
 
-export { gsap, ScrollTrigger, ScrollSmoother };
+export { gsap, ScrollTrigger };
 
 
 // ---------- "magnet": after scrolling stops between two blocks, pull the page to the block in the direction of travel ----------

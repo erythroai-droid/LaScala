@@ -2,7 +2,7 @@
 
 Современный редизайн главной страницы ресторана La Scala. Развёрнут из шаблона
 [`erythroai-droid/templates` → `product-scroll-landing`](https://github.com/erythroai-droid/templates):
-Next.js 15 + React 19 + GSAP (ScrollTrigger / ScrollSmoother), i18n RU/EN.
+Next.js 15 + React 19 + GSAP ScrollTrigger (native scroll, no ScrollSmoother), i18n RU/EN.
 
 ```bash
 npm install

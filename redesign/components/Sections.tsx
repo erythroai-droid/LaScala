@@ -27,7 +27,7 @@ function useStack(ref: RefObject<HTMLElement | null>) {
       trigger: node,
       start: () => (node.offsetHeight > window.innerHeight + 2 ? 'bottom bottom' : 'top top'),
       endTrigger: next, end: 'top top',
-      pin: true, pinSpacing: false, invalidateOnRefresh: true,
+      pin: true, pinSpacing: false, anticipatePin: 1, invalidateOnRefresh: true,   // anticipate: fix it a hair early, native scroll runs ahead of JS
     });
     return () => st.kill();
   }, [ready, ref]);
@@ -404,7 +404,7 @@ export function Footer() {
   // while the events block slides away over it; a footer taller than the screen then scrolls on as usual
   useEffect(() => {
     if (!ready) return;
-    const st = ScrollTrigger.create({ trigger: el.current, start: 'top top', end: () => `+=${window.innerHeight}`, pin: true, invalidateOnRefresh: true });
+    const st = ScrollTrigger.create({ trigger: el.current, start: 'top top', end: () => `+=${window.innerHeight}`, pin: true, anticipatePin: 1, invalidateOnRefresh: true });
     return () => st.kill();
   }, [ready]);
 
