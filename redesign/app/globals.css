@@ -13,10 +13,12 @@
   --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{background:var(--dark);scrollbar-width:none;-ms-overflow-style:none;overflow-x:clip;max-width:100%}
+/* the page background is the paper colour: whatever the browser has not drawn yet (it shows the root background there)
+   reads as paper under block 01 instead of a black flash on the first scroll */
+html{background:var(--bg);scrollbar-width:none;-ms-overflow-style:none;overflow-x:clip;max-width:100%}
 html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
 body{
-  overflow-x:clip;max-width:100%;width:100%;background:var(--dark);
+  overflow-x:clip;max-width:100%;width:100%;background:var(--bg);
   color:var(--fg);font-family:var(--font-main),"Helvetica Neue",Arial,sans-serif;font-weight:400;font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased;
 }
 #smooth-wrapper,#smooth-content,main{width:100%;max-width:100%;overflow-x:clip}
@@ -84,7 +86,11 @@ h3{font-family:var(--serif);font-weight:500}
 
 /* ---------- hero ---------- */
 .hero{position:relative;height:var(--vh);min-height:560px;overflow:hidden;background:var(--dark);color:var(--cream)}
-.hero-media{position:absolute;inset:0}
+/* the hero is pinned (moved by transform) and its photo scaled as soon as the page moves: give both their GPU layer from the start,
+   so the first scroll does not rebuild the layers of everything over them (that rebuild was the first-scroll flash) */
+.hero{will-change:transform}
+.hero-media{position:absolute;inset:0;will-change:transform}
+html.static .hero,html.static .hero-media{will-change:auto}
 .hero.off{visibility:hidden}
 .hero.off *{animation-play-state:paused!important}
 .hero-media picture{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease}

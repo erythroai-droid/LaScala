@@ -150,7 +150,7 @@ export function About() {
       <div className="about-grid">
         <Reveal from="up" className="about-photo">
           <div ref={photo} className="about-photo-in">
-            <img src="/img/entrance.webp" alt={t('about_alt')} width={994} height={670} loading="lazy" />
+            <img src="/img/entrance.webp" alt={t('about_alt')} width={994} height={670} decoding="async" />
           </div>
         </Reveal>
         <div className="about-copy">

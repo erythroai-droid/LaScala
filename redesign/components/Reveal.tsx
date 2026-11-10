@@ -48,8 +48,10 @@ export default function Reveal({
       return () => { tw.scrollTrigger?.kill(); tw.kill(); gsap.set(node, { clearProps: 'all' }); };
     }
 
+    // force3D off: otherwise all the reveals of a block become GPU layers at the same moment (first scroll into it),
+    // the browser rebuilds and redraws the layers and for a frame shows nothing; these small fades repaint cheaply
     const tween = gsap.fromTo(node, fromVars, {
-      ...toVars, duration: 0.95, delay: delaySec, ease: 'power3.out', paused: true,
+      ...toVars, duration: 0.95, delay: delaySec, ease: 'power3.out', paused: true, force3D: false,
       // drop the layer hint only when done: removing it mid-animation re-rasterises the block and makes it flicker
       onComplete: () => node.classList.add('in'),
     });
