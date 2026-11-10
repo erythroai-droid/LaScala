@@ -71,28 +71,38 @@ export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // the slideshow only plays while the page is at the very top. Once block 01 starts to ride over the hero, slide changes
+  // (cross-fade + Ken Burns restart) under it made the browser rebuild the layers above every few seconds — on some GPUs
+  // block 01 then lost parts (stripes of the hero showing through, missing header/text) while the visitor was just reading.
+  const [atTop, setAtTop] = useState(true);
+  useEffect(() => {
+    const on = () => setAtTop(window.scrollY < 4);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
+
   // autoplay; a manual change restarts the timer
   useEffect(() => {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || !atTop) return;
     const id = setTimeout(() => setI((v) => (v + 1) % n), HERO_INTERVAL);
     return () => clearTimeout(id);
-  }, [i, n]);
+  }, [i, n, atTop]);
 
   useEffect(() => {
     if (!ready) return;
     const node = el.current!;
-    const media = node.querySelector('.hero-media'), inner = node.querySelector('.hero-in'), veil = node.querySelector('.hero-veil');
+    const media = node.querySelector('.hero-media'), inner = node.querySelector('.hero-in');
     const tl = gsap.timeline({ defaults: { force3D: true }, scrollTrigger: { trigger: node, start: 'top top', end: 'bottom top', scrub: true } })
-      .to(media, { scale: 1.12, ease: 'none' }, 0)
-      .to(veil, { opacity: 1, ease: 'none' }, 0)
+      .to(media, { scale: 1.12, opacity: 0.28, ease: 'none' }, 0)   // dims into the dark hero background: no separate veil layer
       .to(inner, { yPercent: -8, autoAlpha: 0, ease: 'none' }, 0);
     // once block 01 covers the hero completely, stop painting it (slideshow, Ken Burns) — it only cost frames under the moving page
     const off = ScrollTrigger.create({ trigger: node, start: 'bottom top', end: 'max', onToggle: (s) => node.classList.toggle('off', s.isActive) });
-    return () => { off.kill(); node.classList.remove('off'); tl.scrollTrigger?.kill(); tl.kill(); gsap.set([media, inner, veil], { clearProps: 'all' }); };
+    return () => { off.kill(); node.classList.remove('off'); tl.scrollTrigger?.kill(); tl.kill(); gsap.set([media, inner], { clearProps: 'all' }); };
   }, [ready]);
 
   return (
-    <section ref={el} id="top" className="hero" data-tone="dark">
+    <section ref={el} id="top" className={atTop ? 'hero' : 'hero held'} data-tone="dark">
       <div className="hero-media" aria-hidden>
         {HERO_SLIDES.map((s, k) => (
           <picture key={s.src} className={k === i ? 'on' : ''}>
@@ -101,7 +111,6 @@ export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }
           </picture>
         ))}
       </div>
-      <div className="hero-veil" aria-hidden />
       <div className="hero-in">
         <small className="hero-k">{t('hero_k')}</small>
         <h1><span><b>{t('hero_h1')}</b></span><span><b><em>{t('hero_h2')}</em></b></span></h1>
