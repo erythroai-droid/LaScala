@@ -82,7 +82,7 @@ export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }
     if (!ready) return;
     const node = el.current!;
     const media = node.querySelector('.hero-media'), inner = node.querySelector('.hero-in'), veil = node.querySelector('.hero-veil');
-    const tl = gsap.timeline({ scrollTrigger: { trigger: node, start: 'top top', end: 'bottom top', scrub: true } })
+    const tl = gsap.timeline({ defaults: { force3D: true }, scrollTrigger: { trigger: node, start: 'top top', end: 'bottom top', scrub: true } })
       .to(media, { scale: 1.12, ease: 'none' }, 0)
       .to(veil, { opacity: 1, ease: 'none' }, 0)
       .to(inner, { yPercent: -8, autoAlpha: 0, ease: 'none' }, 0);
@@ -138,8 +138,10 @@ export function About() {
     if (!ready) return;
     const img = photo.current?.querySelector('img');
     if (!img) return;
-    const tw = gsap.fromTo(img, { yPercent: -7 }, {
-      yPercent: 7, ease: 'none',
+    // force3D: keep the photo on its own GPU layer for good. With "auto" GSAP drops the layer whenever the scrub rests and adds it
+    // back on the next scroll; each switch re-rasterised the photo and it blinked out (an empty frame) — the jerking picture in block 01.
+    const tw = gsap.fromTo(img, { yPercent: -7, force3D: true }, {
+      yPercent: 7, ease: 'none', force3D: true,
       scrollTrigger: { trigger: photo.current, start: 'top bottom', end: 'bottom top', scrub: true },
     });
     return () => { tw.scrollTrigger?.kill(); tw.kill(); gsap.set(img, { clearProps: 'transform' }); };
@@ -213,8 +215,8 @@ export function Hours() {
     if (!ready) return;
     const img = el.current?.querySelector('.dk-bg img');
     if (!img) return;
-    const tw = gsap.fromTo(img, { yPercent: -10 }, {
-      yPercent: 10, ease: 'none',
+    const tw = gsap.fromTo(img, { yPercent: -10, force3D: true }, {   // own GPU layer for good (see About)
+      yPercent: 10, ease: 'none', force3D: true,
       scrollTrigger: { trigger: el.current, start: 'top bottom', end: 'bottom top', scrub: true },
     });
     return () => { tw.scrollTrigger?.kill(); tw.kill(); gsap.set(img, { clearProps: 'transform' }); };
@@ -320,7 +322,7 @@ export function Gallery() {
     size();
     ScrollTrigger.addEventListener('refreshInit', size);
     const tw = gsap.to(row, {
-      x: () => -dist(), ease: 'none',
+      x: () => -dist(), ease: 'none', force3D: true,   // the photo strip keeps one GPU layer (see About)
       scrollTrigger: { trigger: node, start: 'top top', end: () => `+=${dist()}`, scrub: true, invalidateOnRefresh: true },
     });
     ScrollTrigger.refresh();
