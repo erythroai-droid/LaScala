@@ -2,11 +2,14 @@
 import { createContext, ReactNode, useContext, useEffect, useState, useSyncExternalStore } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
 
-// Native scrolling, no ScrollSmoother: the smoother moves the whole page as one transformed layer (~10 000 px tall, ×2 on retina),
+// Smoothing without ScrollSmoother: the smoother moves the whole page as one transformed layer (~10 000 px tall, ×2 on retina),
 // which is over the GPU texture limit of Safari/Firefox/many integrated GPUs — they skipped drawing it and block 01 blinked out.
-// Pins now use position: fixed (ScrollTrigger's default with native scroll), which the compositor keeps rock-steady.
+// Lenis instead eases the real window scroll position frame by frame (nothing is transformed), so pins stay position: fixed
+// and the page still glides. It runs on GSAP's ticker, so ScrollTrigger updates in the same frame as the scroll — no pin lag.
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
+let lenis: Lenis | null = null;
 
 /** Pause (in screens, 100 = one screen) at the end of a block before the next one starts to slide over it. Keep in sync with --hold in globals.css. */
 export const HOLD = 100;
@@ -47,11 +50,20 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     window.addEventListener('resize', onResize);
     ScrollTrigger.addEventListener('refreshInit', setVh);   // re-measure on every refresh, resize events are not reliable on phones
     ScrollTrigger.config({ ignoreMobileResize: true });
+    const ln = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9, autoRaf: false });   // lerp: share of the remaining distance covered per frame
+    lenis = ln;
+    ln.on('scroll', ScrollTrigger.update);
+    const tick = (time: number) => ln.raf(time * 1000);
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
     setReady(true);
     const refresh = () => ScrollTrigger.refresh();
     document.fonts?.ready.then(refresh);
     window.addEventListener('load', refresh);
-    return () => { window.removeEventListener('load', refresh); window.removeEventListener('resize', onResize); ScrollTrigger.removeEventListener('refreshInit', setVh); };
+    return () => {
+      window.removeEventListener('load', refresh); window.removeEventListener('resize', onResize); ScrollTrigger.removeEventListener('refreshInit', setVh);
+      gsap.ticker.remove(tick); ln.destroy(); lenis = null;
+    };
   }, [staticMode]);
 
   return (
@@ -63,6 +75,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
 
 /** Pause/resume scrolling (modals). */
 export function lockScroll(lock: boolean) {
+  if (lock) lenis?.stop(); else lenis?.start();
   document.documentElement.style.overflow = lock ? 'hidden' : '';
   document.body.style.overflow = lock ? 'hidden' : '';
 }
@@ -95,6 +108,8 @@ function glideTo(y: number) {
   glide?.kill();
   const from = window.scrollY, dist = Math.abs(y - from);
   if (dist < 2) return;
+  const duration = prefersReducedMotion() ? 0.01 : Math.min(2.6, 0.9 + (dist / window.innerHeight) * 0.08);   // longer for longer trips, capped
+  if (lenis) { lenis.scrollTo(y, { duration, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) }); return; }   // user input interrupts it
   const pos = { y: from };
   const stop = () => glide?.kill();
   const input = ['wheel', 'touchstart', 'keydown', 'mousedown'] as const;
@@ -102,7 +117,7 @@ function glideTo(y: number) {
   input.forEach((e) => window.addEventListener(e, stop, { passive: true }));
   glide = gsap.to(pos, {
     y,
-    duration: prefersReducedMotion() ? 0.01 : Math.min(2.6, 0.9 + (dist / window.innerHeight) * 0.08),   // longer for longer trips, capped
+    duration,
     ease: 'power3.inOut',
     onUpdate: () => window.scrollTo(0, pos.y),
     onComplete: done,
