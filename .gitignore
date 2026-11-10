@@ -1,0 +1,8 @@
+node_modules/
+.next/
+.next-build/
+*.tsbuildinfo
+.env*
+.claude/
+.DS_Store
+Thumbs.db

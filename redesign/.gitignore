@@ -1,0 +1,9 @@
+node_modules/
+.next/
+.next-build/
+*.tsbuildinfo
+
+# large client media (generate frames locally; keep stub webp in git)
+public/video/*
+!public/video/.gitkeep
+/Video/

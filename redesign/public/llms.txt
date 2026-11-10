@@ -1,0 +1,21 @@
+# La Scala
+
+> La Scala is an Italian restaurant in the centre of Moscow: open kitchen with a wood-fired grill, house-made cheeses and a team of Italian chefs.
+
+- **Address:** Moscow, Akademika Sakharova Ave, 7
+- **Phone (reservations):** +7 495 607 52 53
+- **Mobile:** +7 (977) 564 64 36
+- **E-mail:** info@lascalaristorante.ru
+- **Opening hours:** Mon-Fri 08:00-24:00; weekends from 10:00 until the last guest
+- **Metro:** Chistye Prudy, Turgenevskaya, Sretensky Bulvar; within walking distance of Sukharevskaya and Krasnye Vorota
+- **Languages:** Russian, English
+
+## Page sections
+
+- #top: welcome
+- #about: about the restaurant
+- #hours: opening hours and reservations
+- #menu: menu (Italian breakfast, main menu, pizzeria)
+- #gallery: photo gallery
+- #events: events
+- #contact: contacts

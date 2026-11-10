@@ -1,0 +1,34 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+
+User-Agent: GPTBot
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+Allow: /
+
+User-Agent: ChatGPT-User
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+Allow: /
+
+User-Agent: ClaudeBot
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+Allow: /
+
+User-Agent: anthropic-ai
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+Allow: /
+
+User-Agent: Google-Extended
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+Allow: /
+
+User-Agent: Applebot-Extended
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+Allow: /
+
+User-Agent: PerplexityBot
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+Allow: /
+
+Host: https://lascala.erythro.ai
+Sitemap: https://lascala.erythro.ai/sitemap.xml

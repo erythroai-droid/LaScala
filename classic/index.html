@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La Scala — ресторан итальянской кухни</title>
+  <meta name="description" content="Итальянский ресторан «La Scala» в центре Москвы: открытая кухня с грилем на дровах, собственное производство сыров, команда итальянских шеф-поваров.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,700;1,400&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap&subset=cyrillic" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="header" id="top">
+  <div class="header__bar">
+    <button class="header__toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="nav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav">
+      <ul class="nav__list nav__list--left">
+        <li><a class="nav__link is-active" href="#about">О нас</a></li>
+        <li><a class="nav__link" href="#menu">Меню</a></li>
+        <li><a class="nav__link" href="#events">События</a></li>
+      </ul>
+      <ul class="nav__list nav__list--right">
+        <li><a class="nav__link" href="#gallery">Галерея</a></li>
+        <li><a class="nav__link" href="#hours">Резерв</a></li>
+        <li><a class="nav__link" href="#contacts">Контакты</a></li>
+      </ul>
+    </nav>
+  </div>
+  <svg class="header__bulge" viewBox="796.876 101 329.024 104" aria-hidden="true" focusable="false">
+    <path d="M1125.9 101C1118.5 127.711 1072.84 204.999 961.5 204.999C853.106 204.999 803.862 130.388 796.876 101Z" fill="#fff" fill-opacity=".9"/>
+  </svg>
+  <a class="header__logo" href="#top" title="La Scala"><img src="img/logo.png" width="190" height="134" alt="La Scala — ресторан итальянской кухни"></a>
+</header>
+
+<!-- ============ HERO SLIDER ============ -->
+<section class="hero" id="hero">
+  <div class="hero__slides">
+    <div class="hero__slide is-active" style="background-image:url(img/slide-3.jpg)"></div>
+    <div class="hero__slide" style="background-image:url(img/slide-1.jpg)"></div>
+    <div class="hero__slide" style="background-image:url(img/slide-2.jpg)"></div>
+  </div>
+  <div class="hero__caption">
+    <h1 class="hero__title">Добро пожаловать!</h1>
+    <img class="hero__ornament" src="img/orn-hero.png" width="105" height="17" alt="">
+    <p class="hero__subtitle">Ресторан Итальянской Кухни</p>
+  </div>
+  <button class="hero__arrow hero__arrow--prev" type="button" aria-label="Предыдущий слайд"><img src="img/arrow-left.png" width="80" height="80" alt=""></button>
+  <button class="hero__arrow hero__arrow--next" type="button" aria-label="Следующий слайд"><img src="img/arrow-right.png" width="80" height="80" alt=""></button>
+  <a class="hero__down" href="#about" aria-label="Листать вниз">
+    <svg width="43" height="42" viewBox="0 0 43 42" fill="none" aria-hidden="true">
+      <circle cx="21.69" cy="21.19" r="19.2" stroke="#fff"/>
+      <path d="M21.0021 11.128C20.1509 11.429 19.5404 12.2385 19.5402 13.1924V15.3858C19.5402 16.3398 20.1509 17.149 21.0021 17.4503V19.0401H22.464V17.4503C23.315 17.1488 23.9259 16.3397 23.9259 15.3858V13.1924C23.9257 12.2387 23.315 11.4292 22.464 11.128V8.80768H24.6564C27.4819 8.80768 29.7726 11.0987 29.7726 13.9239V27.0792C29.7726 29.9046 27.4819 32.1954 24.6564 32.1954H18.8097C15.9842 32.1954 13.6935 29.9046 13.6935 27.0792V13.9239C13.6935 11.0987 15.9842 8.80768 18.8097 8.80768H21.0021V11.128ZM21.7325 11.7315C22.5398 11.7315 23.1942 12.3854 23.1945 13.1924V15.3858C23.1945 16.1929 22.5399 16.8467 21.7325 16.8467C20.9254 16.8465 20.2716 16.1928 20.2716 15.3858V13.1924C20.2719 12.3855 20.9256 11.7317 21.7325 11.7315Z" fill="#fff"/>
+    </svg>
+  </a>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="section paper paper--bottom about" id="about">
+  <div class="container">
+    <h2 class="title">Дорогие друзья!</h2>
+    <img class="title-ornament" src="img/orn-title.png" width="171" height="42" alt="">
+    <div class="about__body">
+      <div class="about__photo"><img src="img/about.jpg" width="770" height="575" alt="Вход в ресторан La Scala"></div>
+      <div class="about__card">
+        <p class="about__lead">Мы рады приветствовать Вас<br>на сайте нашего ресторана.</p>
+        <p>Итальянский Ресторан «La Scala» расположен в центре города и дарит своим гостям возможность насладиться духом солнечной Италии.</p>
+        <p>«La Scala» - «Лестница» в кулинарный мир итальянской кухни, где подножие и каждая ступень это традиции и семейные рецепты. Гордость нашего ресторана – команда Итальянцев, профессионалов своего дела, объединенных любовью к еде и гостеприимству. Здесь все время звучит итальянская речь — это хорошая возможность пообщаться с носителями языка и познакомиться с традициями Италии.</p>
+        <p>Разнообразное меню от итальянских шеф поваров, открытая кухня с грилем на дровах и собственное производство сыров, вот что создает атмосферу домашнего очага и уюта.</p>
+        <a class="ribbon about__more" href="#menu"><span>подробнее</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WORKING HOURS ============ -->
+<section class="section dark hours" id="hours">
+  <div class="container">
+    <h2 class="title title--light title--flourish">Часы работы</h2>
+    <img class="hours__ornament" src="img/orn-hours.png" width="241" height="17" alt="">
+    <div class="hours__body">
+      <div class="hours__col">
+        <p class="hours__label">с понедельника по пятницу</p>
+        <p class="hours__time">08:00</p>
+        <p class="hours__time">24:00</p>
+      </div>
+      <div class="hours__col">
+        <p class="hours__label">в выходные дни</p>
+        <p class="hours__time">10:00</p>
+        <p class="hours__note">до последнего гостя</p>
+      </div>
+    </div>
+    <p class="hours__reserve">Резерв: <a href="tel:+74956075253">+7 495 607 52 53</a></p>
+  </div>
+</section>
+
+<!-- ============ MENU ============ -->
+<section class="section paper paper--top paper--bottom menu" id="menu">
+  <img class="menu__deco menu__deco--left" src="img/menu-left.png" width="373" height="860" alt="">
+  <img class="menu__deco menu__deco--right" src="img/menu-right.png" width="367" height="860" alt="">
+  <div class="container">
+    <h2 class="title">Наше меню</h2>
+    <img class="title-ornament" src="img/orn-title.png" width="171" height="42" alt="">
+    <div class="menu__cols">
+
+      <div class="menu__col">
+        <h3 class="menu__head"><span>Итальянский завтрак</span></h3>
+        <h4 class="menu__cat">Каши</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Каша овсяная со свежей голубикой</span><i></i><span class="menu__price">250 р</span></li>
+          <li><span class="menu__name">Каша овсяная со свежей голубикой</span><i></i><span class="menu__price">190 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Хрустящие панини</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Панини с креветками и помидорами</span><i></i><span class="menu__price">450 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Сендвичи</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Поджаренный тост (1шт)</span><i></i><span class="menu__price">110 р</span></li>
+          <li><span class="menu__name">Сэндвич с курицей и яичницей</span><i></i><span class="menu__price">280 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Омлеты и яичница</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Омлет со слабосоленой семгой и красной икрой</span><i></i><span class="menu__price">320 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Десерты</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Фруктовый салат</span><i></i><span class="menu__price">270 р</span></li>
+          <li><span class="menu__name">Блинчики (2 шт.)</span><i></i><span class="menu__price">140 р</span></li>
+        </ul>
+      </div>
+
+      <div class="menu__col">
+        <h3 class="menu__head"><span>Основное меню</span></h3>
+        <h4 class="menu__cat">Холодные закуски</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Балык из лосося, Тартар и севиче из сибаса</span><i></i><span class="menu__price">650 р</span></li>
+          <li><span class="menu__name">Тартар и севиче из сибаса</span><i></i><span class="menu__price">1100 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Горячие закуски</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Салат с осьминогом, картофелем и цукини</span><i></i><span class="menu__price">780 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Супы</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Тортеллони с телятиной в бульоне</span><i></i><span class="menu__price">550 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Ризотто</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Ризотто с печенью цыпленка и радичио</span><i></i><span class="menu__price">320 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Паста</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Орекьетте по-апулийски</span><i></i><span class="menu__price">850 р</span></li>
+          <li><span class="menu__name">Блинчики (2 шт.)</span><i></i><span class="menu__price">140 р</span></li>
+        </ul>
+      </div>
+
+      <div class="menu__col">
+        <h3 class="menu__head"><span>Пиццерия</span></h3>
+        <h4 class="menu__cat">Пицца</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Пицца с лесными грибами и панчеттой</span><i></i><span class="menu__price">490 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Ризотто и паста</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Паста с креветками и рукколой</span><i></i><span class="menu__price">550 р</span></li>
+          <li><span class="menu__name">Спагетти карбонара</span><i></i><span class="menu__price">500 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Сладости</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Кантуччи с миндалем (100 гр.)</span><i></i><span class="menu__price">220 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Антипасти</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Рулетики из цуккини по-римски</span><i></i><span class="menu__price">320 р</span></li>
+          <li><span class="menu__name">Ветчина из индейки под соусом гуакамоле</span><i></i><span class="menu__price">410 р</span></li>
+        </ul>
+        <h4 class="menu__cat">Горячие блюда</h4>
+        <ul class="menu__list">
+          <li><span class="menu__name">Ножки ягненка с кускусом и овощами</span><i></i><span class="menu__price">750 р</span></li>
+          <li><span class="menu__name">Мясо на вертеле (в выходные дни)</span><i></i><span class="menu__price">750 р</span></li>
+        </ul>
+      </div>
+
+    </div>
+    <div class="section__more"><a class="btn btn--outline-gold" href="#menu">все меню</a></div>
+  </div>
+</section>
+
+<!-- ============ GALLERY ============ -->
+<section class="section dark gallery" id="gallery">
+  <div class="container">
+    <h2 class="title title--light">Галерея</h2>
+    <img class="title-ornament" src="img/orn-title-white.png" width="171" height="42" alt="">
+  </div>
+  <div class="gallery__carousel">
+    <div class="gallery__viewport">
+      <ul class="gallery__track">
+        <li><a class="gallery__item" href="img/slide-3.jpg"><img src="img/slide-3.jpg" alt="Вход в ресторан" loading="lazy"></a></li>
+        <li><a class="gallery__item" href="img/hours-bg.jpg"><img src="img/hours-bg.jpg" alt="Зал ресторана" loading="lazy"></a></li>
+        <li><a class="gallery__item" href="img/slide-1.jpg"><img src="img/slide-1.jpg" alt="Интерьер" loading="lazy"></a></li>
+        <li><a class="gallery__item" href="img/gallery-bg.jpg"><img src="img/gallery-bg.jpg" alt="Уютный зал" loading="lazy"></a></li>
+        <li><a class="gallery__item" href="img/slide-2.jpg"><img src="img/slide-2.jpg" alt="Интерьер" loading="lazy"></a></li>
+        <li><a class="gallery__item" href="img/about.jpg"><img src="img/about.jpg" alt="Лестница у входа" loading="lazy"></a></li>
+        <li><a class="gallery__item" href="img/event-4.jpg"><img src="img/event-4.jpg" alt="Фасад ресторана" loading="lazy"></a></li>
+      </ul>
+    </div>
+    <button class="gallery__arrow gallery__arrow--prev" type="button" aria-label="Назад"><img src="img/arrow-left.png" width="80" height="80" alt=""></button>
+    <button class="gallery__arrow gallery__arrow--next" type="button" aria-label="Вперёд"><img src="img/arrow-right.png" width="80" height="80" alt=""></button>
+  </div>
+  <div class="section__more"><a class="btn btn--outline-white" href="#gallery">перейти в галерею</a></div>
+</section>
+
+<!-- ============ EVENTS ============ -->
+<section class="section paper paper--top events" id="events">
+  <div class="container">
+    <h2 class="title">События</h2>
+    <img class="title-ornament" src="img/orn-title.png" width="171" height="42" alt="">
+    <div class="events__grid">
+      <article class="event">
+        <div class="event__photo"><img src="img/event-1.jpg" width="400" height="240" alt="" loading="lazy"></div>
+        <div class="event__card">
+          <h3 class="event__title">Воскресный Итальянский бранч</h3>
+          <time class="event__date" datetime="2016-06-01">1 июня, 2016</time>
+          <a class="ribbon" href="#events"><span>подробнее</span></a>
+        </div>
+      </article>
+      <article class="event">
+        <div class="event__photo"><img src="img/event-2.jpg" width="400" height="240" alt="" loading="lazy"></div>
+        <div class="event__card">
+          <h3 class="event__title">Вечер джаза.<br>Пятница</h3>
+          <time class="event__date" datetime="2016-05-28">28 мая, 2016</time>
+          <a class="ribbon" href="#events"><span>подробнее</span></a>
+        </div>
+      </article>
+      <article class="event">
+        <div class="event__photo"><img src="img/event-3.jpg" width="400" height="240" alt="" loading="lazy"></div>
+        <div class="event__card">
+          <h3 class="event__title">Draw Up! Мастер-класс по живописи!</h3>
+          <time class="event__date" datetime="2016-05-25">25 мая, 2016</time>
+          <a class="ribbon" href="#events"><span>подробнее</span></a>
+        </div>
+      </article>
+      <article class="event">
+        <div class="event__photo"><img src="img/event-4.jpg" width="400" height="240" alt="" loading="lazy"></div>
+        <div class="event__card">
+          <h3 class="event__title">Открытие ресторана итальянской кухни</h3>
+          <time class="event__date" datetime="2016-05-19">19 мая, 2016</time>
+          <a class="ribbon" href="#events"><span>подробнее</span></a>
+        </div>
+      </article>
+    </div>
+    <div class="section__more"><a class="btn btn--red" href="#events">все события</a></div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer" id="contacts">
+  <div class="container footer__grid">
+    <div class="footer__col footer__col--brand">
+      <a class="footer__logo" href="#top"><img src="img/logo-footer.png" width="169" height="44" alt="La Scala"></a>
+      <p class="footer__tagline">Ресторан Итальянской Кухни</p>
+      <ul class="social">
+        <li><a class="social__link social__link--vk" href="#" aria-label="ВКонтакте"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#fff" d="M12.8 17.3c-5.5 0-8.6-3.7-8.7-10h2.7c.1 4.6 2.1 6.5 3.7 6.9V7.3h2.6v4c1.600-.2 3.200-2 3.800-4h2.600c-.4 2.400-2.200 4.200-3.500 5 1.300.6 3.300 2.200 4.100 5h-2.800c-.6-1.900-2.100-3.400-4.100-3.600v3.600z"/></svg></a></li>
+        <li><a class="social__link social__link--fb" href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#fff" d="M13.5 21v-7.900h2.600l.4-3.100h-3V8.100c0-.9.200-1.500 1.500-1.500h1.600V3.800c-.3 0-1.200-.1-2.300-.1-2.300 0-3.900 1.400-3.900 4V10H7.800v3.100h2.600V21z"/></svg></a></li>
+        <li><a class="social__link social__link--ig" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#fff" d="M7.500 3.500h9a4 4 0 0 1 4 4v9a4 4 0 0 1-4 4h-9a4 4 0 0 1-4-4v-9a4 4 0 0 1 4-4zm0 1.800a2.200 2.200 0 0 0-2.200 2.200v9c0 1.200 1 2.200 2.200 2.200h9c1.200 0 2.200-1 2.200-2.200v-9c0-1.200-1-2.200-2.200-2.200zM12 7.700a4.300 4.300 0 1 1 0 8.600 4.300 4.300 0 0 1 0-8.600zm0 1.800a2.500 2.500 0 1 0 0 5 2.500 2.500 0 0 0 0-5zm4.600-2.900a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg></a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <h3 class="footer__title">Контакты</h3>
+      <p>Москва, проспект Академика Сахарова, 7</p>
+      <p><span class="footer__label">Телефон:</span> <a href="tel:+74956075253">+7 495 607 52 53</a></p>
+      <p><span class="footer__label">Моб.телефон:</span> <a href="tel:+79775646436">+7 (977) 564 64 36</a></p>
+      <p><span class="footer__label">E-mail:</span> <a href="mailto:info@lascalaristorante.ru">info@lascalaristorante.ru</a></p>
+    </div>
+    <div class="footer__col">
+      <h3 class="footer__title">Метро</h3>
+      <p>Чистые пруды, Тургеневская, Сретенский бульвар</p>
+      <p>В шаговой доступности станции:</p>
+      <p>Сухаревская и Красные ворота</p>
+    </div>
+    <div class="footer__col">
+      <h3 class="footer__title">Часы работы</h3>
+      <p>пн-пт с 8:00 до 24:00,</p>
+      <p>выходные с 10:00 до последнего гостя</p>
+    </div>
+  </div>
+</footer>
+
+<!-- lightbox -->
+<div class="lightbox" aria-hidden="true">
+  <button class="lightbox__close" type="button" aria-label="Закрыть">&times;</button>
+  <img class="lightbox__img" src="" alt="">
+</div>
+
+<script src="js/jquery-3.7.1.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
