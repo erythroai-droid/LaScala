@@ -6,4 +6,5 @@ node_modules/
 # large client media (generate frames locally; keep stub webp in git)
 public/video/*
 !public/video/.gitkeep
+!public/video/hero/
 /Video/

@@ -7,13 +7,10 @@ export const PHONE = { label: '+7 495 607 52 53', href: 'tel:+74956075253' };
 export const MOBILE = { label: '+7 (977) 564 64 36', href: 'tel:+79775646436' };
 export const EMAIL = 'info@lascalaristorante.ru';
 
-/** Hero slideshow (public/img; smaller widths in public/img/r, picked by srcset). */
-export const HERO_SLIDES = [
-  { src: '/img/hero-1.webp' },
-  { src: '/img/hero-2.webp' },
-  { src: '/img/hero-3.webp' },
-] as const;
-export const HERO_INTERVAL = 6500;
+/** Hero: the promo video cut into frames (public/video/hero/{1440,960}/f000.webp …, 12 fps), played by scrolling.
+ *  Phones get the same video as a muted loop (hero-960.mp4). Source: public/video/LaScala_Promo_1920x1080.mp4. */
+export const HERO_FRAMES = { count: 149, dir: '/video/hero', widths: [960, 1440], video: '/video/hero/hero-960.mp4' } as const;
+export const heroFrame = (w: number, k: number) => `${HERO_FRAMES.dir}/${w}/f${String(k).padStart(3, '0')}.webp`;
 
 /** Opening hours: weekdays 08:00–24:00, weekends from 10:00 until the last guest. */
 export const HOURS = { weekdays: ['08:00', '24:00'], weekends: ['10:00'] } as const;

@@ -6,7 +6,7 @@ import Modal from './Modal';
 import { OPEN_CONTACT } from './Header';
 import { useI18n } from '@/lib/i18n';
 import { gsap, prefersReducedMotion, ScrollTrigger, useScrollReady, useStaticMode } from '@/lib/scroll';
-import { BRAND, EMAIL, EVENTS, GALLERY, HERO_INTERVAL, HERO_SLIDES, HOURS, MENU, MOBILE, MODEL, pad, PHONE, SOCIAL } from '@/lib/site';
+import { BRAND, EMAIL, EVENTS, GALLERY, HERO_FRAMES, heroFrame, HOURS, MENU, MOBILE, MODEL, pad, PHONE, SOCIAL } from '@/lib/site';
 
 const openReserve = () => window.dispatchEvent(new Event(OPEN_CONTACT));
 
@@ -34,12 +34,6 @@ function useStack(ref: RefObject<HTMLElement | null>) {
   }, [ready, ref]);
 }
 
-/** Responsive widths of a hero photo (public/img/r, generated from the 1920px original). */
-const sizesOf = (src: string) => {
-  const n = src.split('/').pop()!.replace('.webp', '');
-  return `/img/r/${n}-640.webp 640w, /img/r/${n}-1024.webp 1024w, /img/r/${n}-1440.webp 1440w, ${src} 1920w`;
-};
-
 /** Darkened full-bleed photo behind a dark block (same treatment as the opening hours).
  *  It shows through at 5–23% only, so a 1280px, strongly compressed copy (public/img/r/*-bg.webp) is indistinguishable and ~4x lighter. */
 function DarkBg({ src }: { src: string }) {
@@ -56,17 +50,29 @@ function Head({ k, h1, h2, n }: { k: string; h1: string; h2: string; n?: string 
   );
 }
 
-/** Hero: photo slideshow, pinned while the rest of the page rides up over it (the photo slowly scales and dims). */
+/** How many screens of scrolling play the whole hero video (desktop). */
+const HERO_RUN = 3;
+
+/**
+ * Hero: the promo video (a walk from the street through the door into the hall), cut into frames and played by scrolling.
+ * The screen stays put (useStack) while an empty run of HERO_RUN screens scrolls past it and drives the frames on a canvas;
+ * then block 01 rides up over the last frame, which slowly scales and dims.
+ * Static page (phones, tablets, reduced motion): the same video as a muted loop, or only its first frame.
+ */
 export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }) {
   const { t } = useI18n();
   const ready = useScrollReady();
+  const staticMode = useStaticMode();
   const el = useRef<HTMLElement>(null);
+  const run = useRef<HTMLDivElement>(null);
   const first = useRef<HTMLImageElement>(null);
-  const [i, setI] = useState(0);
-  const n = HERO_SLIDES.length;
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const bar = useRef<HTMLElement>(null);
+  const [motion, setMotion] = useState(true);
+  useEffect(() => setMotion(!prefersReducedMotion()), []);
   useStack(el);
 
-  // the preloader leaves as soon as the first photo is there
+  // the preloader leaves as soon as the first frame is there (a plain <img>: it also paints before any script runs)
   useEffect(() => {
     const img = first.current;
     if (!img) return;
@@ -78,19 +84,7 @@ export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // the other slides sit inside the screen (opacity 0), so the browser fetched them with the first one, competing with it.
-  // Give them their source only once the page has loaded; the first change is HERO_INTERVAL later anyway.
-  const [rest, setRest] = useState(false);
-  useEffect(() => {
-    const go = () => setTimeout(() => setRest(true), 800);
-    if (document.readyState === 'complete') { const id = go(); return () => clearTimeout(id); }
-    window.addEventListener('load', go, { once: true });
-    return () => window.removeEventListener('load', go);
-  }, []);
-
-  // the slideshow only plays while the page is at the very top. Once block 01 starts to ride over the hero, slide changes
-  // (cross-fade + Ken Burns restart) under it made the browser rebuild the layers above every few seconds — on some GPUs
-  // block 01 then lost parts (stripes of the hero showing through, missing header/text) while the visitor was just reading.
+  // the drip of the scroll hint only runs while the page is at the very top (nothing animates under block 01)
   const [atTop, setAtTop] = useState(true);
   useEffect(() => {
     const on = () => setAtTop(window.scrollY < 4);
@@ -99,38 +93,115 @@ export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }
     return () => window.removeEventListener('scroll', on);
   }, []);
 
-  // autoplay; a manual change restarts the timer
-  useEffect(() => {
-    if (prefersReducedMotion() || !atTop) return;
-    const id = setTimeout(() => setI((v) => (v + 1) % n), HERO_INTERVAL);
-    return () => clearTimeout(id);
-  }, [i, n, atTop]);
-
   useEffect(() => {
     if (!ready) return;
-    const node = el.current!;
+    const node = el.current!, spacer = run.current!, cv = canvas.current!, line = bar.current;
+    const next = spacer.nextElementSibling as HTMLElement | null;   // block 01 (the hero itself is wrapped by its pin by now)
+    const ctx = cv.getContext('2d', { alpha: false })!;
     const media = node.querySelector('.hero-media'), inner = node.querySelector('.hero-in');
-    const tl = gsap.timeline({ defaults: { force3D: true }, scrollTrigger: { trigger: node, start: 'top top', end: 'bottom top', scrub: true } })
-      .to(media, { scale: 1.12, opacity: 0.28, ease: 'none' }, 0)   // dims into the dark hero background: no separate veil layer
-      .to(inner, { yPercent: -8, autoAlpha: 0, ease: 'none' }, 0);
-    // once block 01 covers the hero completely, stop painting it (slideshow, Ken Burns) — it only cost frames under the moving page
-    const off = ScrollTrigger.create({ trigger: node, start: 'bottom top', end: 'max', onToggle: (s) => node.classList.toggle('off', s.isActive) });
-    return () => { off.kill(); node.classList.remove('off'); tl.scrollTrigger?.kill(); tl.kill(); gsap.set([media, inner], { clearProps: 'all' }); };
+    const N = HERO_FRAMES.count;
+    // 960px frames are enough below ~1300 device pixels; the 1440px ones above (under the dark veil a wider copy is not visible)
+    const w = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1300 ? 1440 : 960;
+    const frames: (HTMLImageElement | null)[] = new Array(N).fill(null);
+    let want = 0, shown = -1, raf = 0, dead = false;
+
+    // the canvas keeps the screen's size (device pixels, capped: a 2560+ px wide canvas only upscales a 1440px frame)
+    const fit = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const cw = Math.min(2560, Math.round(cv.clientWidth * dpr)), ch = Math.round(cw * (cv.clientHeight / Math.max(1, cv.clientWidth)));
+      if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; shown = -1; draw(); }
+    };
+    // nearest frame that has arrived (while frames are still loading, a fast scroll shows the closest one instead of nothing)
+    const nearest = (k: number) => {
+      for (let d = 0; d < N; d++) {
+        if (frames[k - d]) return k - d;
+        if (frames[k + d]) return k + d;
+      }
+      return -1;
+    };
+    const draw = () => {
+      raf = 0;
+      const k = nearest(want);
+      if (k < 0 || k === shown) return;
+      const img = frames[k]!, s = Math.max(cv.width / img.naturalWidth, cv.height / img.naturalHeight);   // cover
+      const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+      ctx.drawImage(img, (cv.width - dw) / 2, (cv.height - dh) / 2, dw, dh);
+      shown = k;
+      cv.classList.add('on');   // over the first-frame <img> from now on
+    };
+    const ask = () => { if (!raf) raf = requestAnimationFrame(draw); };
+
+    // fetch order: a coarse pass over the whole video first (every 16th frame), then finer passes fill the gaps,
+    // so scrolling anywhere soon has a frame close by. Each frame is decoded before it counts, so drawing it costs no decode.
+    const order: number[] = [];
+    for (let step = 16; step >= 1; step /= 2) for (let k = 0; k < N; k += step) if (!order.includes(k)) order.push(k);
+    let pos = 0;
+    const pull = async () => {
+      while (!dead && pos < order.length) {
+        const k = order[pos++], img = new Image();
+        try { await new Promise<void>((ok, no) => { img.onload = () => ok(); img.onerror = no; img.src = heroFrame(w, k); }); } catch { continue; }
+        // decode now rather than on the first draw; capped, since decode() waits while the tab is in the background
+        await Promise.race([img.decode().catch(() => {}), new Promise((r) => setTimeout(r, 400))]);
+        if (dead) return;
+        frames[k] = img;
+        if (shown < 0 || Math.abs(k - want) < Math.abs(shown - want)) ask();   // closer to the wanted frame than what is on screen
+      }
+    };
+    // after the first screen is done (the first frame is the <img>), six requests at a time
+    const start = () => { for (let c = 0; c < 6; c++) void pull(); };
+    let startId = 0;
+    const go = () => { startId = window.setTimeout(start, 300); };
+    if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
+
+    const ro = new ResizeObserver(fit);
+    ro.observe(cv);
+    fit();
+
+    // the run of empty space below the hero is the video's length; scrolling through it picks the frame
+    const dist = () => window.innerHeight * HERO_RUN;
+    const size = () => { spacer.style.height = `${dist()}px`; };
+    size();
+    ScrollTrigger.addEventListener('refreshInit', size);
+    const play = ScrollTrigger.create({
+      trigger: spacer, start: 'top bottom', end: 'bottom bottom', invalidateOnRefresh: true,   // the run, not the pinned hero: a pinned trigger is measured after its pin
+      onUpdate: (s) => {
+        want = Math.min(N - 1, Math.round(s.progress * (N - 1)));
+        if (line) line.style.transform = `scaleX(${s.progress})`;
+        ask();
+      },
+    });
+    // the heading leaves during the first part of the walk (in front of the door), and the veil under it lightens
+    const text = gsap.timeline({ scrollTrigger: { trigger: spacer, start: 'top bottom', end: () => `+=${dist() * 0.28}`, scrub: true, invalidateOnRefresh: true } })
+      .to(inner, { yPercent: -8, autoAlpha: 0, ease: 'none', force3D: true }, 0)
+      .fromTo(media, { '--veil': 1 }, { '--veil': 0.45, ease: 'none' }, 0);
+    // block 01 rides up over the last frame: it scales a little and dims into the dark hero background (no separate veil layer)
+    const dim = next ? gsap.to(media, {
+      scale: 1.12, opacity: 0.28, ease: 'none', force3D: true,
+      scrollTrigger: { trigger: next, start: 'top bottom', end: 'top top', scrub: true },
+    }) : null;
+    // once block 01 covers the hero completely, stop painting it
+    const off = next ? ScrollTrigger.create({ trigger: next, start: 'top top', end: 'max', onToggle: (s) => node.classList.toggle('off', s.isActive) }) : null;
+    ScrollTrigger.refresh();
+
+    return () => {
+      dead = true; cancelAnimationFrame(raf); clearTimeout(startId); window.removeEventListener('load', go); ro.disconnect();
+      ScrollTrigger.removeEventListener('refreshInit', size); spacer.style.height = '';
+      play.kill(); off?.kill(); node.classList.remove('off');
+      text.scrollTrigger?.kill(); text.kill(); dim?.scrollTrigger?.kill(); dim?.kill();
+      gsap.set([media, inner], { clearProps: 'all' });
+      cv.classList.remove('on');
+    };
   }, [ready]);
 
   return (
+    <>
     <section ref={el} id="top" className={atTop ? 'hero' : 'hero held'} data-tone="dark">
       <div className="hero-media" aria-hidden>
-        {HERO_SLIDES.map((s, k) => (
-          <picture key={s.src} className={k === i ? 'on' : ''}>
-            {/* widths in public/img/r; "cover" on a wide screen needs max(100vw, 150vh). Phones (dense screens, the photo is dimmed under the text)
-                ask for 380px so the browser takes the 1024w copy instead of the 1920px original */}
-            {k === 0 || rest ? (
-              <img ref={k === 0 ? first : undefined} src={s.src} srcSet={sizesOf(s.src)} sizes="(max-width: 900px) 380px, max(100vw, 150vh)" alt="" width={1920} height={1280}
-                fetchPriority={k === 0 ? 'high' : 'low'} decoding="async" />
-            ) : null}
-          </picture>
-        ))}
+        <img ref={first} src={heroFrame(1440, 0)} srcSet={`${heroFrame(960, 0)} 960w, ${heroFrame(1440, 0)} 1440w`} sizes="(max-width: 900px) 600px, max(100vw, 178vh)"
+          alt="" width={1440} height={810} fetchPriority="high" decoding="async" />
+        {staticMode
+          ? (motion && <video src={HERO_FRAMES.video} muted autoPlay loop playsInline preload="auto" />)
+          : <canvas ref={canvas} />}
       </div>
       <div className="hero-in">
         <small className="hero-k">{t('hero_k')}</small>
@@ -141,13 +212,7 @@ export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }
         </div>
       </div>
       <div className="hero-bar">
-        <div className="hero-dots" role="tablist" aria-label={t('slide')}>
-          {HERO_SLIDES.map((s, k) => (
-            <button key={s.src} role="tab" aria-selected={k === i} aria-label={`${t('slide')} ${k + 1}`} className={k === i ? 'on' : ''} onClick={() => setI(k)}>
-              <i>{pad(k + 1)}</i><span style={{ '--d': `${HERO_INTERVAL}ms` } as CSSProperties} />
-            </button>
-          ))}
-        </div>
+        <div className="hero-prog">{!staticMode && <span><b ref={bar} /></span>}</div>
         <span className="hero-scroll">{t('scroll')}<i /></span>
         <div className="hero-info">
           <span>{t('hero_addr')}</span>
@@ -155,6 +220,8 @@ export function Hero({ onLoadProgress }: { onLoadProgress: (v: number) => void }
         </div>
       </div>
     </section>
+    <div ref={run} className="hero-run" data-spacer aria-hidden />
+    </>
   );
 }
 
